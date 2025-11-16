@@ -1,0 +1,5 @@
+{
+  "name": "DreamCanvas",
+  "description": "An all-in-one application to generate and edit images, create videos from photos, and chat with advanced AI models powered by the Gemini API.",
+  "requestFramePermissions": []
+}

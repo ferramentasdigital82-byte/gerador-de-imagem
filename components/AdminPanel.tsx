@@ -1,0 +1,130 @@
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { AdminUser } from '../types';
+import DashboardStats from './DashboardStats';
+import UserManagement from './UserManagement';
+import EditUserModal from './EditUserModal';
+import ConfirmationModal from './ConfirmationModal';
+
+const initialUsers: AdminUser[] = [
+  { id: 1, name: 'Alice Johnson', email: 'alice@example.com', status: 'Active', imagesGenerated: 85, plan: 'Pro' },
+  { id: 2, name: 'Bob Williams', email: 'bob@example.com', status: 'Active', imagesGenerated: 23, plan: 'Starter' },
+  { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', status: 'Blocked', imagesGenerated: 150, plan: 'Pro' },
+  { id: 4, name: 'Diana Miller', email: 'diana@example.com', status: 'Active', imagesGenerated: 450, plan: 'Ultimate' },
+  { id: 5, name: 'Ethan Davis', email: 'ethan@example.com', status: 'Active', imagesGenerated: 98, plan: 'Starter' },
+  { id: 7, name: 'Grace Hall', email: 'grace@example.com', status: 'Active', imagesGenerated: 5, plan: 'Free' },
+];
+
+const AdminPanel: React.FC = () => {
+  const [users, setUsers] = useState<AdminUser[]>(() => {
+    let savedUsersData = localStorage.getItem('dreamcanvas_admin_users');
+
+    if (savedUsersData === null) {
+      // Key does not exist. This is the very first run.
+      // Seed initial data and save it immediately.
+      savedUsersData = JSON.stringify(initialUsers);
+      localStorage.setItem('dreamcanvas_admin_users', savedUsersData);
+    }
+    
+    try {
+      // Now, try to parse whatever is in storage.
+      return JSON.parse(savedUsersData);
+    } catch (error) {
+      console.error('Could not parse users from localStorage', error);
+      // If parsing fails, don't fallback to initialUsers, just start fresh.
+      return [];
+    }
+  });
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentUserToEdit, setCurrentUserToEdit] = useState<AdminUser | null>(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+
+  useEffect(() => {
+    try {
+      // This effect syncs any state changes back to localStorage.
+      localStorage.setItem('dreamcanvas_admin_users', JSON.stringify(users));
+    } catch (error) {
+      console.error('Could not save users to localStorage', error);
+    }
+  }, [users]);
+
+  const stats = useMemo(() => {
+    const totalUsers = users.length;
+    const activeSubscriptions = users.filter(u => u.status === 'Active').length;
+    const totalImagesGenerated = users.reduce((acc, user) => acc + user.imagesGenerated, 0);
+    return { totalUsers, activeSubscriptions, totalImagesGenerated };
+  }, [users]);
+
+  const toggleUserStatus = useCallback((userId: number) => {
+    setUsers(prevUsers => prevUsers.map(user =>
+      user.id === userId
+        ? { ...user, status: user.status === 'Active' ? 'Blocked' : 'Active' }
+        : user
+    ));
+  }, []);
+
+  const handleOpenEditModal = useCallback((user: AdminUser) => {
+    setCurrentUserToEdit(user);
+    setIsEditModalOpen(true);
+  }, []);
+
+  const handleCloseEditModal = useCallback(() => {
+    setIsEditModalOpen(false);
+    setCurrentUserToEdit(null);
+  }, []);
+
+  const handleUpdateUser = useCallback((updatedUser: AdminUser) => {
+    setUsers(prevUsers => prevUsers.map(user =>
+      user.id === updatedUser.id ? updatedUser : user
+    ));
+    handleCloseEditModal();
+  }, [handleCloseEditModal]);
+
+  const handleOpenConfirmModal = useCallback((user: AdminUser) => {
+    setUserToDelete(user);
+    setIsConfirmModalOpen(true);
+  }, []);
+
+  const handleCloseConfirmModal = useCallback(() => {
+    setIsConfirmModalOpen(false);
+    setUserToDelete(null);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (userToDelete) {
+      setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
+    }
+    handleCloseConfirmModal();
+  }, [userToDelete, handleCloseConfirmModal]);
+
+  return (
+    <div className="space-y-8">
+      <DashboardStats stats={stats} />
+      <UserManagement 
+        users={users} 
+        onToggleStatus={toggleUserStatus} 
+        onEditUser={handleOpenEditModal}
+        onDeleteUser={handleOpenConfirmModal}
+      />
+      {isEditModalOpen && currentUserToEdit && (
+        <EditUserModal 
+          user={currentUserToEdit}
+          onClose={handleCloseEditModal}
+          onSave={handleUpdateUser}
+        />
+      )}
+      {isConfirmModalOpen && userToDelete && (
+        <ConfirmationModal
+            isOpen={isConfirmModalOpen}
+            onClose={handleCloseConfirmModal}
+            onConfirm={handleConfirmDelete}
+            title="Confirm Deletion"
+            message={`Are you sure you want to delete "${userToDelete.name}"? This action cannot be undone.`}
+        />
+      )}
+    </div>
+  );
+};
+
+export default AdminPanel;
