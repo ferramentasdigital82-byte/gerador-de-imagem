@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AdminUser, UserPlan } from '../types';
 
@@ -5,11 +6,12 @@ interface EditUserModalProps {
   user: AdminUser;
   onClose: () => void;
   onSave: (user: AdminUser) => void;
+  t: (key: string, replacements?: Record<string, string>) => string;
 }
 
 const planOptions: UserPlan[] = ['Free', 'Starter', 'Pro', 'Ultimate'];
 
-const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSave }) => {
+const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSave, t }) => {
   const [formData, setFormData] = useState<AdminUser>(user);
 
   useEffect(() => {
@@ -35,12 +37,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSave }) 
       <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4 border border-gray-700">
         <form onSubmit={handleSubmit}>
           <div className="p-6 border-b border-gray-700">
-            <h2 className="text-xl font-bold text-white">Editar Assinante</h2>
-            <p className="text-sm text-gray-400">Atualize os detalhes de {user.name}.</p>
+            <h2 className="text-xl font-bold text-white">{t('admin.editModal.title')}</h2>
+            <p className="text-sm text-gray-400">{t('admin.editModal.description', { userName: user.name })}</p>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">Name</label>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">{t('admin.editModal.nameLabel')}</label>
               <input
                 type="text"
                 name="name"
@@ -51,7 +53,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSave }) 
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">{t('admin.editModal.emailLabel')}</label>
               <input
                 type="email"
                 name="email"
@@ -61,9 +63,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSave }) 
                 className="w-full px-3 py-2 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            {/* FIX: Prevent editing of 'Reseller' plan, making it read-only for consistency. */}
             <div>
-              <label htmlFor="plan" className="block text-sm font-medium text-gray-300 mb-1">Plan</label>
+              <label htmlFor="plan" className="block text-sm font-medium text-gray-300 mb-1">{t('admin.editModal.planLabel')}</label>
               {formData.plan === 'Reseller' ? (
                 <input
                   type="text"
@@ -94,13 +95,13 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSave }) 
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
             >
-              Cancel
+              {t('admin.editModal.cancelButton')}
             </button>
             <button 
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              Save Changes
+              {t('admin.editModal.saveButton')}
             </button>
           </div>
         </form>

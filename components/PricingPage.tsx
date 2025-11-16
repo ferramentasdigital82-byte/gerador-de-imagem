@@ -1,6 +1,11 @@
 
 import React, { useState, useCallback } from 'react';
 
+// FIX: Add t prop for translations
+interface PricingPageProps {
+  t: (key: string, replacements?: Record<string, string>) => string;
+}
+
 const CheckIcon: React.FC = () => (
     <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
 );
@@ -98,9 +103,11 @@ interface PaymentModalProps {
   plan: Plan;
   onClose: () => void;
   onPaymentSuccess: (planName: string) => void;
+  // FIX: Add t prop for translations
+  t: (key: string, replacements?: Record<string, string>) => string;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ plan, onClose, onPaymentSuccess }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({ plan, onClose, onPaymentSuccess, t }) => {
     const [activeTab, setActiveTab] = useState<'card' | 'pix'>('card');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -132,8 +139,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ plan, onClose, onPaymentSuc
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h3 className="text-2xl font-bold text-white mt-4">Payment Successful!</h3>
-                    <p className="text-gray-400 mt-2">Your <span className="font-semibold text-white">{plan.name}</span> plan is now active. Happy creating!</p>
+                    <h3 className="text-2xl font-bold text-white mt-4">{t('pricing.successTitle')}</h3>
+                    <p className="text-gray-400 mt-2">{t('pricing.successMessage', { planName: plan.name })}</p>
                 </div>
             </div>
         )
@@ -147,15 +154,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ plan, onClose, onPaymentSuc
             >
                 <div className="p-6 border-b border-gray-700 flex justify-between items-center">
                     <div>
-                        <h2 className="text-xl font-bold text-white">Complete your purchase</h2>
-                        <p className="text-sm text-gray-400">You are subscribing to the <span className="font-semibold text-white">{plan.name}</span> plan.</p>
+                        <h2 className="text-xl font-bold text-white">{t('pricing.modalTitle')}</h2>
+                        <p className="text-sm text-gray-400">{t('pricing.modalSubtitle', { planName: plan.name })}</p>
                     </div>
                     <button onClick={handleClose} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
                 </div>
 
                 <div className="p-2 bg-gray-900 flex space-x-2">
-                    <button onClick={() => setActiveTab('card')} className={`flex-1 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'card' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Credit Card</button>
-                    <button onClick={() => setActiveTab('pix')} className={`flex-1 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'pix' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>PIX</button>
+                    <button onClick={() => setActiveTab('card')} className={`flex-1 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'card' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>{t('pricing.creditCardTab')}</button>
+                    <button onClick={() => setActiveTab('pix')} className={`flex-1 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'pix' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>{t('pricing.pixTab')}</button>
                 </div>
 
                 <form onSubmit={handlePayment} className="p-6">
@@ -195,9 +202,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ plan, onClose, onPaymentSuc
                         {isProcessing ? (
                            <>
                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                             Processing...
+                             {t('pricing.processingButton')}
                            </>
-                        ) : `Pay ${plan.price}`}
+                        ) : t('pricing.payButton', { price: plan.price })}
                     </button>
                 </form>
             </div>
@@ -209,9 +216,11 @@ interface PricingCardProps {
     plan: Plan;
     isSelected: boolean;
     onSelect: (plan: Plan) => void;
+    // FIX: Add t prop for translations
+    t: (key: string) => string;
 }
 
-const PricingCard: React.FC<PricingCardProps> = ({ plan, isSelected, onSelect }) => {
+const PricingCard: React.FC<PricingCardProps> = ({ plan, isSelected, onSelect, t }) => {
     const colors = {
         gray: { ring: 'ring-gray-500', bg: 'bg-gray-600', hoverBg: 'hover:bg-gray-700', text: 'text-gray-400' },
         green: { ring: 'ring-green-500', bg: 'bg-green-600', hoverBg: 'hover:bg-green-700', text: 'text-green-400' },
@@ -223,7 +232,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, isSelected, onSelect })
     return (
         <div className={`relative flex flex-col p-6 bg-gray-800 rounded-2xl border border-gray-700 shadow-lg transition-all duration-300 ${isSelected ? 'ring-2 ' + colorScheme.ring : ''}`}>
             {plan.highlight && (
-                <div className="absolute top-0 -translate-y-1/2 px-3 py-1 text-sm font-semibold tracking-wide text-white bg-blue-600 rounded-full shadow-md">Most Popular</div>
+                <div className="absolute top-0 -translate-y-1/2 px-3 py-1 text-sm font-semibold tracking-wide text-white bg-blue-600 rounded-full shadow-md">{t('pricing.mostPopular')}</div>
             )}
             <h3 className={`text-2xl font-bold ${colorScheme.text}`}>{plan.name}</h3>
             <div className="flex items-baseline mt-4">
@@ -245,13 +254,13 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, isSelected, onSelect })
                 disabled={isSelected}
                 className={`w-full mt-8 px-6 py-3 font-semibold text-white rounded-lg transition-colors duration-300 ${isSelected ? 'bg-gray-500 cursor-not-allowed' : `${colorScheme.bg} ${colorScheme.hoverBg}`}`}
             >
-                {isSelected ? 'Current Plan' : plan.cta}
+                {isSelected ? t('pricing.currentPlan') : t('pricing.choosePlan')}
             </button>
         </div>
     );
 };
 
-const PricingPage: React.FC = () => {
+const PricingPage: React.FC<PricingPageProps> = ({ t }) => {
   const [selectedPlan, setSelectedPlan] = useState<string>('Pro');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [planToPurchase, setPlanToPurchase] = useState<Plan | null>(null);
@@ -277,10 +286,10 @@ const PricingPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center">
         <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-          Find the right plan for you
+          {t('pricing.title')}
         </h2>
         <p className="mt-4 text-lg text-gray-400">
-          Start for free, then upgrade to a plan that fits your creative needs.
+          {t('pricing.description')}
         </p>
       </div>
       <div className="mt-12 grid gap-8 lg:grid-cols-4 sm:grid-cols-2">
@@ -290,6 +299,7 @@ const PricingPage: React.FC = () => {
             plan={plan}
             isSelected={selectedPlan === plan.name}
             onSelect={handleChoosePlan}
+            t={t}
           />
         ))}
       </div>
@@ -298,6 +308,7 @@ const PricingPage: React.FC = () => {
           plan={planToPurchase}
           onClose={handleCloseModal}
           onPaymentSuccess={handlePaymentSuccess}
+          t={t}
         />
       )}
     </div>

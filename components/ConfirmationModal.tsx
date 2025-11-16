@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface ConfirmationModalProps {
@@ -6,9 +7,10 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   title: string;
   message: string;
+  t: (key: string) => string;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, message, t }) => {
   if (!isOpen) return null;
 
   return (
@@ -31,14 +33,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-medium text-gray-300 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
           >
-            Cancel
+            {t('admin.confirmModal.cancelButton')}
           </button>
           <button 
             type="button"
             onClick={onConfirm}
             className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
-            Yes, I'm sure
+            {t('admin.confirmModal.confirmButton')}
           </button>
         </div>
       </div>

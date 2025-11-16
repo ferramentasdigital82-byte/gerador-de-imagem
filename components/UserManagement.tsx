@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AdminUser } from '../types';
 import { EditIcon, TrashIcon } from './Icons';
@@ -7,6 +8,7 @@ interface UserManagementProps {
   onToggleStatus: (userId: number) => void;
   onEditUser: (user: AdminUser) => void;
   onDeleteUser: (user: AdminUser) => void;
+  t: (key: string) => string;
 }
 
 const planColorMap = {
@@ -14,28 +16,27 @@ const planColorMap = {
   'Ultimate': 'bg-purple-900 text-purple-300',
   'Starter': 'bg-green-900 text-green-300',
   'Free': 'bg-gray-700 text-gray-300',
-  // FIX: Add color mapping for the 'Reseller' plan for UI consistency.
   'Reseller': 'bg-yellow-900 text-yellow-300',
 };
 
-const UserManagement: React.FC<UserManagementProps> = ({ users, onToggleStatus, onEditUser, onDeleteUser }) => {
+const UserManagement: React.FC<UserManagementProps> = ({ users, onToggleStatus, onEditUser, onDeleteUser, t }) => {
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
-      <div className="p-5 border-b border-gray-700 flex justify-between items-center">
+      <div className="p-5 border-b border-gray-700 flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Lista de Assinantes</h2>
-          <p className="text-sm text-gray-400">Gerencie seus assinantes.</p>
+          <h2 className="text-xl font-bold text-white">{t('admin.users.title')}</h2>
+          <p className="text-sm text-gray-400">{t('admin.users.description')}</p>
         </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left text-gray-300">
           <thead className="text-xs text-gray-400 uppercase bg-gray-700/50">
             <tr>
-              <th scope="col" className="px-6 py-3">Assinante</th>
-              <th scope="col" className="px-6 py-3">Plan</th>
-              <th scope="col" className="px-6 py-3 text-center">Images Generated</th>
-              <th scope="col" className="px-6 py-3 text-center">Status</th>
-              <th scope="col" className="px-6 py-3 text-center">Actions</th>
+              <th scope="col" className="px-6 py-3">{t('admin.users.headerUser')}</th>
+              <th scope="col" className="px-6 py-3">{t('admin.users.headerPlan')}</th>
+              <th scope="col" className="px-6 py-3 text-center">{t('admin.users.headerImages')}</th>
+              <th scope="col" className="px-6 py-3 text-center">{t('admin.users.headerStatus')}</th>
+              <th scope="col" className="px-6 py-3 text-center">{t('admin.users.headerActions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -72,7 +73,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onToggleStatus, 
                       }`}
                       aria-label={user.status === 'Active' ? `Block ${user.name}` : `Activate ${user.name}`}
                      >
-                      {user.status === 'Active' ? 'Block' : 'Activate'}
+                      {user.status === 'Active' ? t('admin.users.blockButton') : t('admin.users.activateButton')}
                      </button>
                      <button
                         onClick={() => onDeleteUser(user)}
@@ -80,7 +81,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onToggleStatus, 
                         aria-label={`Delete ${user.name}`}
                       >
                         <TrashIcon className="w-4 h-4" />
-                        <span>Delete</span>
+                        <span>{t('admin.users.deleteButton')}</span>
                       </button>
                    </div>
                 </td>

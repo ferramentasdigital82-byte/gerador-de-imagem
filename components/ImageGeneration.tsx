@@ -1,8 +1,13 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { DownloadIcon, TrashIcon } from './Icons';
 
-const ImageGeneration: React.FC = () => {
+interface ImageGenerationProps {
+  t: (key: string) => string;
+}
+
+const ImageGeneration: React.FC<ImageGenerationProps> = ({ t }) => {
   const [prompt, setPrompt] = useState<string>('A high-resolution photo of a futuristic city skyline at dusk, with flying cars and neon lights, cinematic lighting.');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -161,14 +166,14 @@ const ImageGeneration: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-gray-800 rounded-2xl shadow-lg border border-gray-700">
-      <h2 className="text-2xl font-bold mb-4 text-center text-gray-200">Image Generation with Imagen</h2>
-      <p className="text-center text-gray-400 mb-6">Describe an image, and let Imagen bring it to life. Be as descriptive as you like for the best results.</p>
+      <h2 className="text-2xl font-bold mb-4 text-center text-gray-200">{t('imageGeneration.title')}</h2>
+      <p className="text-center text-gray-400 mb-6">{t('imageGeneration.description')}</p>
       
       <div className="space-y-4">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g., A majestic lion wearing a crown, sitting on a throne in a jungle"
+          placeholder={t('imageGeneration.promptPlaceholder')}
           className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-shadow duration-200 text-gray-200 min-h-[100px] resize-none"
           disabled={isLoading || isRemovingBackground}
         />
@@ -183,10 +188,10 @@ const ImageGeneration: React.FC = () => {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Generating...
+              {t('imageGeneration.generatingButton')}
             </>
           ) : (
-            'Generate Image'
+            t('imageGeneration.generateButton')
           )}
         </button>
       </div>
@@ -215,7 +220,7 @@ const ImageGeneration: React.FC = () => {
                                 aria-label="Download original image"
                             >
                                 <DownloadIcon className="w-5 h-5" />
-                                <span>Download</span>
+                                <span>{t('imageGeneration.downloadButton')}</span>
                             </button>
                             <button
                                 onClick={handleDeleteOriginal}
@@ -223,7 +228,7 @@ const ImageGeneration: React.FC = () => {
                                 aria-label="Delete original image"
                             >
                                 <TrashIcon className="w-5 h-5" />
-                                <span>Delete</span>
+                                <span>{t('imageGeneration.deleteButton')}</span>
                             </button>
                         </div>
                     </div>
@@ -243,7 +248,7 @@ const ImageGeneration: React.FC = () => {
                                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        <p className="mt-2">Processing...</p>
+                                        <p className="mt-2">{t('imageGeneration.processingButton')}</p>
                                     </div>
                                 ) : bgRemovedImageUrl ? (
                                     <img 
@@ -261,7 +266,7 @@ const ImageGeneration: React.FC = () => {
                                         aria-label="Download background-removed image"
                                     >
                                         <DownloadIcon className="w-5 h-5" />
-                                        <span>Download</span>
+                                        <span>{t('imageGeneration.downloadButton')}</span>
                                     </button>
                                     <button
                                         onClick={handleDeleteBgRemoved}
@@ -269,7 +274,7 @@ const ImageGeneration: React.FC = () => {
                                         aria-label="Delete background-removed image"
                                     >
                                         <TrashIcon className="w-5 h-5" />
-                                        <span>Delete</span>
+                                        <span>{t('imageGeneration.deleteButton')}</span>
                                     </button>
                                 </div>
                             )}
@@ -282,7 +287,7 @@ const ImageGeneration: React.FC = () => {
                     disabled={isRemovingBackground}
                     className="w-full flex justify-center items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors duration-300"
                 >
-                    {isRemovingBackground ? 'Processing...' : 'Remove Background'}
+                    {isRemovingBackground ? t('imageGeneration.processingButton') : t('imageGeneration.removeBgButton')}
                 </button>
                 {bgRemovalError && <p className="mt-2 text-center text-red-400 bg-red-900/50 p-3 rounded-lg">{bgRemovalError}</p>}
             </div>
@@ -292,14 +297,14 @@ const ImageGeneration: React.FC = () => {
           <div className="w-full aspect-square bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center">
             <div className="text-center text-gray-500">
               <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-              <p className="mt-2">Your generated image will appear here.</p>
+              <p className="mt-2">{t('imageGeneration.placeholder')}</p>
             </div>
           </div>
         )}
       </div>
 
       <div className="mt-8">
-        <h3 className="text-lg font-semibold text-gray-300 mb-4">Generation History</h3>
+        <h3 className="text-lg font-semibold text-gray-300 mb-4">{t('imageGeneration.historyTitle')}</h3>
         {imageHistory.length > 0 ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
             {imageHistory.map((url, index) => (
@@ -319,7 +324,7 @@ const ImageGeneration: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-8 bg-gray-900/50 rounded-lg">
-            <p className="text-gray-500">Your generated images will appear here.</p>
+            <p className="text-gray-500">{t('imageGeneration.emptyHistory')}</p>
           </div>
         )}
       </div>

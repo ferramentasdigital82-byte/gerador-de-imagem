@@ -14,24 +14,29 @@ const initialUsers: AdminUser[] = [
   { id: 7, name: 'Grace Hall', email: 'grace@example.com', status: 'Active', imagesGenerated: 5, plan: 'Free' },
 ];
 
-const AdminPanel: React.FC = () => {
+interface AdminPanelProps {
+    t: (key: string, replacements?: Record<string, string>) => string;
+}
+
+const AdminPanel: React.FC<AdminPanelProps> = ({ t }) => {
   const [users, setUsers] = useState<AdminUser[]>(() => {
+    const hasBeenSeeded = localStorage.getItem('dreamcanvas_admin_users_seeded');
     let savedUsersData = localStorage.getItem('dreamcanvas_admin_users');
 
-    if (savedUsersData === null) {
-      // Key does not exist. This is the very first run.
-      // Seed initial data and save it immediately.
-      savedUsersData = JSON.stringify(initialUsers);
-      localStorage.setItem('dreamcanvas_admin_users', savedUsersData);
+    if (!hasBeenSeeded) {
+        // First time ever. Seed the data.
+        savedUsersData = JSON.stringify(initialUsers);
+        localStorage.setItem('dreamcanvas_admin_users', savedUsersData);
+        localStorage.setItem('dreamcanvas_admin_users_seeded', 'true');
     }
-    
+
     try {
-      // Now, try to parse whatever is in storage.
-      return JSON.parse(savedUsersData);
+        // If savedUsersData is null (because it was cleared, but 'seeded' flag is still there),
+        // parse will get null, so we return an empty array as a fallback.
+        return savedUsersData ? JSON.parse(savedUsersData) : [];
     } catch (error) {
-      console.error('Could not parse users from localStorage', error);
-      // If parsing fails, don't fallback to initialUsers, just start fresh.
-      return [];
+        console.error('Could not parse users from localStorage', error);
+        return []; // Return empty array on parsing error
     }
   });
 
@@ -42,7 +47,6 @@ const AdminPanel: React.FC = () => {
 
   useEffect(() => {
     try {
-      // This effect syncs any state changes back to localStorage.
       localStorage.setItem('dreamcanvas_admin_users', JSON.stringify(users));
     } catch (error) {
       console.error('Could not save users to localStorage', error);
@@ -100,18 +104,20 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <DashboardStats stats={stats} />
+      <DashboardStats stats={stats} t={t} />
       <UserManagement 
         users={users} 
         onToggleStatus={toggleUserStatus} 
         onEditUser={handleOpenEditModal}
         onDeleteUser={handleOpenConfirmModal}
+        t={t}
       />
       {isEditModalOpen && currentUserToEdit && (
         <EditUserModal 
           user={currentUserToEdit}
           onClose={handleCloseEditModal}
           onSave={handleUpdateUser}
+          t={t}
         />
       )}
       {isConfirmModalOpen && userToDelete && (
@@ -119,8 +125,9 @@ const AdminPanel: React.FC = () => {
             isOpen={isConfirmModalOpen}
             onClose={handleCloseConfirmModal}
             onConfirm={handleConfirmDelete}
-            title="Confirm Deletion"
-            message={`Are you sure you want to delete "${userToDelete.name}"? This action cannot be undone.`}
+            title={t('admin.confirmModal.title')}
+            message={t('admin.confirmModal.message', { userName: userToDelete.name })}
+            t={t}
         />
       )}
     </div>
